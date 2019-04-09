@@ -1,0 +1,40 @@
+Test RJDBC:
+
+# For Beeline (another JDBC client) connection string, it should be "!connect jdbc:hive2://<host>:<port>/<db>;principal=<Server_Principal_of_HiveServer2>”.
+
+library(“RJDBC”)
+
+hive.class.path = list.files(path=c("/usr/hdp/current/hive-client/lib"), pattern="jar", full.names=T);
+
+hadoop.lib.path = list.files(path=c("/usr/hdp/current/hadoop-client/lib"), pattern="jar", full.names=T);
+
+hadoop.class.path = list.files(path=c("/usr/hdp/current/hadoop-client"), pattern="jar", full.names=T);
+
+hadoopclient.class.path = list.files(path=c("/usr/hdp/current/hadoop-client/client"), pattern="jar", full.names=T);
+
+mapred.class.path = list.files(path=c("/usr/hdp/current/hadoop-mapreduce-client"), pattern="jar", full.names=T);
+
+conf.path = "/etc/hadoop/conf";
+
+cp = c(conf.path,hadoop.lib.path,hive.class.path, hadoopclient.class.path, hadoop.class.path, mapred.class.path )
+
+.jinit(classpath=cp)
+
+drv <- JDBC(“org.apache.hive.jdbc.HiveDriver”,classPath = cp,identifier.quote=”`”)
+
+# Simple auth
+conn <- dbConnect(drv, “jdbc:hive2://vm2.moj.ida:10000/default”, “hive”, “hivePassword”)
+
+dbListTables(conn);
+
+dbGetQuery(conn, “create table someTable(key int,value string) “)
+
+dbGetQuery(conn, “insert into someTable values (1,’one’)”)
+
+dbGetQuery(conn, “select * from someTable”)
+
+
+
+  sometable.key sometable.value
+
+1             1             one
